@@ -1,57 +1,62 @@
 # BookmarkShelf
 
-ブラウザのブックマークをファイルシステムで管理するデスクトップツール。
+> 🇯🇵 [日本語版 README はこちら](README.ja.md)
 
-- **インポート** — Edge / Chrome / Firefox / Safari のエクスポート HTML をディレクトリに変換
-- **エクスポート** — Finder やシェルで編集したフォルダ構造をブラウザへ戻せる HTML に変換
-- **リンクチェック** — ブックマーク内のリンク切れを並列検出・CSV 出力
+Manage browser bookmarks as a plain directory tree — import from Edge/Chrome/Firefox/Safari, reorganize freely in Finder or shell, then export back to browser-ready HTML. Includes a broken-link checker.
 
-## インストール
+> **Note:** This repository was created through vibe coding in collaboration with Claude Code.
 
-### macOS（推奨）
+## Features
 
-[Releases](https://github.com/your-username/bookmark-shelf/releases) から最新の `.dmg` をダウンロード。
+- **Import** — Convert browser bookmark HTML exports into a folder/`.url` file tree
+- **Export** — Rebuild Netscape Bookmark HTML from any edited directory structure
+- **Link Checker** — Parallel HTTP check across all bookmarks with CSV export
 
-| ファイル名 | 対象 |
+## Install
+
+### macOS
+
+Download the latest `.dmg` from [Releases](https://github.com/your-username/bookmark-shelf/releases).
+
+| File | Target |
 |---|---|
 | `BookmarkShelf_x.x.x_aarch64.dmg` | Apple Silicon (M1/M2/M3/M4) |
 | `BookmarkShelf_x.x.x_x86_64.dmg` | Intel Mac |
 
-1. `.dmg` をダブルクリックしてマウント
-2. `BookmarkShelf.app` を `/Applications` にドラッグ
-3. **初回起動の Gatekeeper 解除**（未署名のため必要）:
+1. Mount the `.dmg` and drag `BookmarkShelf.app` to `/Applications`
+2. **First-launch Gatekeeper bypass** (unsigned build):
    ```bash
    xattr -dr com.apple.quarantine /Applications/BookmarkShelf.app
    ```
-   または Finder で右クリック →「開く」→「開く」をクリック
+   or right-click → Open → Open in Finder
 
-## ブックマークのエクスポート方法
+## Exporting bookmarks from your browser
 
-| ブラウザ | 手順 |
+| Browser | Steps |
 |---|---|
-| **Edge** | 設定 → お気に入り → … → お気に入りのエクスポート |
-| **Chrome** | ブックマークマネージャー → … → ブックマークをエクスポート |
-| **Firefox** | ブックマーク → すべてのブックマークを管理 → インポートとバックアップ → HTMLでエクスポート |
-| **Safari** | ファイル → ブックマークをエクスポート |
+| **Edge** | Settings → Favorites → ··· → Export favorites |
+| **Chrome** | Bookmark manager → ··· → Export bookmarks |
+| **Firefox** | Bookmarks → Manage bookmarks → Import and Backup → Export Bookmarks to HTML |
+| **Safari** | File → Export Bookmarks |
 
-## 使い方
+## Usage
 
-1. アプリを起動
-2. **ホーム** → 「ブックマークをインポート」でエクスポート済み HTML を選択
-3. `~/bookmarks/` にフォルダ・`.url` ファイルとして展開される
-4. Finder やターミナルで自由に整理
-5. **ホーム** → 「HTML にエクスポート」でブラウザにインポートできる HTML を生成
-6. **Link Checker** でリンク切れを確認
+1. Launch the app
+2. **Home** → "Import Bookmarks" — select the exported HTML file
+3. Bookmarks expand into `~/Library/Application Support/bookmark-shelf/bookmarks/`
+4. Reorganize freely in Finder or Terminal
+5. **Home** → "Export to HTML" — generates a file ready to import into any browser
+6. **Link Checker** — detect broken links and export results as CSV
 
-## 開発
+## Development
 
-### 必要環境
+### Requirements
 
 - macOS 10.15+
 - Node.js 22+
-- Rust（`rustup` でインストール）
+- Rust (install via `rustup`)
 
-### セットアップ
+### Setup
 
 ```bash
 git clone https://github.com/your-username/bookmark-shelf.git
@@ -59,26 +64,25 @@ cd bookmark-shelf
 npm install
 ```
 
-### コマンド
+### Commands
 
 ```bash
-make dev          # 開発サーバー起動
-make test         # 全テスト実行
-make build-debug  # デバッグビルド（高速）
-make build        # リリースビルド
-make open-dmg     # ビルドした DMG を開く
+make dev          # Start dev server
+make test         # Run all tests
+make build-debug  # Debug build (fast)
+make build        # Release build
+make open-dmg     # Open built DMG
 ```
 
-### リリース
+### Release
 
 ```bash
 git tag v0.1.0
 git push origin v0.1.0
 ```
 
-GitHub Actions が自動で Apple Silicon / Intel 両対応の `.dmg` をビルドし、
-Draft Release として作成します。内容を確認後、Publish してください。
+GitHub Actions automatically builds `.dmg` files for Apple Silicon and Intel, then creates a Draft Release. Review and publish when ready.
 
-## ライセンス
+## License
 
 MIT
