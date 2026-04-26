@@ -1,0 +1,91 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+'
+  workflow_dispatch:
+    inputs:
+      draft:
+        description: 'Create as draft release'
+        type: boolean
+        default: true
+
+jobs:
+  test:
+    name: Test
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+      - run: npm test
+      - run: cd src-tauri && cargo test --lib --tests
+
+  build:
+    name: Build (${{ matrix.target }})
+    needs: test
+    permissions:
+      contents: write
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # Apple Silicon
+          - runner: macos-latest
+            target: aarch64-apple-darwin
+            artifact_suffix: aarch64
+          # Intel Mac
+          - runner: macos-13
+            target: x86_64-apple-darwin
+            artifact_suffix: x86_64
+
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Build (unsigned)
+        # APPLE_SIGNING_IDENTITY を設定しない → ad-hoc 署名で .dmg 生成
+        # 署名+公証を行う場合は下記シークレットをリポジトリに追加:
+        #   APPLE_CERTIFICATE, APPLE_CERTIFICATE_PASSWORD,
+        #   APPLE_SIGNING_IDENTITY, APPLE_ID, APPLE_PASSWORD, APPLE_TEAM_ID
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tagName: ${{ github.ref_name }}
+          releaseName: 'BookmarkShelf ${{ github.ref_name }}'
+          releaseBody: |
+            ## インストール方法
+
+            ### macOS (Apple Silicon / Intel)
+            1. 対応する `.dmg` をダウンロードしてマウント
+            2. `BookmarkShelf.app` を `/Applications` にドラッグ
+            3. **初回起動時のみ** — Gatekeeper をバイパス:
+               ```bash
+               xattr -dr com.apple.quarantine /Applications/BookmarkShelf.app
+               ```
+               または Finder で右クリック →「開く」
+
+            詳細は [README](https://github.com/${{ github.repository }}#readme) を参照してください。
+          releaseDraft: ${{ github.event.inputs.draft != 'false' }}
+          prerelease: false
+          args: --target ${{ matrix.target }}
